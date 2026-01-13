@@ -33,7 +33,8 @@ services:
     command:
       - |
         apt-get update -qq && apt-get install -y -qq curl > /dev/null 2>&1
-        curl -fsSL https://raw.githubusercontent.com/davbauer/hytale-docker-server/main/entrypoint.sh | bash
+        curl -fsSL https://raw.githubusercontent.com/davbauer/hytale-docker-server/main/entrypoint.sh -o /tmp/entrypoint.sh
+        exec bash /tmp/entrypoint.sh
 
     restart: unless-stopped
 
