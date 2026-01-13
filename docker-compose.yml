@@ -1,0 +1,42 @@
+################################################################################
+# Hytale Dedicated Server - Docker Compose
+# GitHub: https://github.com/davbauer/hytale-docker-server
+#
+# Quick Start:
+#   1. docker compose up
+#   2. Open the auth URL shown in logs
+#   3. Wait for download, then /auth login device in console
+################################################################################
+
+services:
+  hytale:
+    image: eclipse-temurin:25-jdk
+    container_name: hytale-server
+    stdin_open: true
+    tty: true
+    working_dir: /app/data
+    ports:
+      - "5520:5520/udp"
+    volumes:
+      - hytale-data:/app/data
+    environment:
+      # Memory allocation (min/max)
+      JAVA_XMS: 4G
+      JAVA_XMX: 8G
+      # Server UDP port
+      SERVER_PORT: 5520
+      # Use AOT cache for faster startup (requires HytaleServer.aot)
+      ENABLE_AOT: "true"
+      # Check for game updates on startup
+      CHECK_UPDATE: "true"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        apt-get update -qq && apt-get install -y -qq curl > /dev/null 2>&1
+        curl -fsSL https://raw.githubusercontent.com/davbauer/hytale-docker-server/main/entrypoint.sh | bash
+
+    restart: unless-stopped
+
+volumes:
+  hytale-data:
+    name: hytale-data
