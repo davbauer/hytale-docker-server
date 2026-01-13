@@ -1,106 +1,74 @@
 # Hytale Dedicated Server - Docker
 
-A simple Docker Compose setup for running a Hytale dedicated server.
+## Option 1: Docker Compose
 
-## Requirements
-
-- [Docker](https://docker.com) with Docker Compose
-
-## Quick Install
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/davbauer/hytale-docker-server/main/install.sh | bash
-cd hytale-server
-docker compose up
-```
-
-## Manual Setup
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/davbauer/hytale-docker-server.git
-   cd hytale-docker-server
-   ```
-
-2. Start the server:
-   ```bash
-   docker compose up
-   ```
-
-3. **Downloader Auth** - Open the URL shown in logs and approve (downloads game files ~1.4GB)
-
-4. **Server Auth** - Once the server starts, type `/auth login device` in the console:
-   ```bash
-   docker attach hytale-server
-   # Type: /auth login device
-   # Open the new URL and approve
-   # Detach with Ctrl+P, Ctrl+Q
-   ```
-
-## Authentication
-
-Hytale requires **two separate authentications**:
-
-| Auth | Purpose | When |
-|------|---------|------|
-| Downloader | Download game files | First run (automatic) |
-| Server | Accept player connections | After server starts |
-
-The server auth is stored in memory by default. To persist credentials across restarts:
-```
-/auth persistence Encrypted
-```
-
-## Configuration
-
-Edit the `environment` section in `docker-compose.yml` to customize your server:
+1. Create `docker-compose.yml`:
 
 ```yaml
-environment:
-  JAVA_XMS: 4G           # Minimum memory
-  JAVA_XMX: 8G           # Maximum memory
-  SERVER_PORT: 5520      # UDP port
-  ENABLE_AOT: "true"     # AOT cache for faster startup
-  CHECK_UPDATE: "true"   # Check for updates on start
+services:
+  hytale:
+    image: eclipse-temurin:25-jdk
+    container_name: hytale-server
+    stdin_open: true
+    tty: true
+    working_dir: /app/data
+    ports:
+      - "5520:5520/udp"
+    volumes:
+      - hytale-data:/app/data
+    environment:
+      JAVA_XMS: 4G
+      JAVA_XMX: 8G
+      SERVER_PORT: 5520
+      ENABLE_AOT: "true"
+      CHECK_UPDATE: "true"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        apt-get update -qq && apt-get install -y -qq curl > /dev/null 2>&1
+        curl -fsSL https://raw.githubusercontent.com/davbauer/hytale-docker-server/main/entrypoint.sh -o /tmp/entrypoint.sh
+        exec bash /tmp/entrypoint.sh
+    restart: unless-stopped
+
+volumes:
+  hytale-data:
 ```
 
-After changing settings, restart with:
-```bash
-docker compose down
-docker compose up
-```
+2. Run:
 
-## Commands
-
-Run in background:
 ```bash
 docker compose up -d
-```
-
-View logs:
-```bash
-docker compose logs -f
-```
-
-Attach to console:
-```bash
 docker attach hytale-server
 ```
-Detach with `Ctrl+P` then `Ctrl+Q`
 
-Stop server:
+## Option 2: Docker Run
+
 ```bash
-docker compose down
+docker run -it --name hytale-server \
+  -p 5520:5520/udp \
+  -v hytale-data:/app/data \
+  -e JAVA_XMS=4G -e JAVA_XMX=8G \
+  -e SERVER_PORT=5520 -e ENABLE_AOT=true -e CHECK_UPDATE=true \
+  --restart unless-stopped \
+  eclipse-temurin:25-jdk \
+  bash -c 'apt-get update -qq && apt-get install -y -qq curl > /dev/null 2>&1 && curl -fsSL https://raw.githubusercontent.com/davbauer/hytale-docker-server/main/entrypoint.sh -o /tmp/entrypoint.sh && exec bash /tmp/entrypoint.sh'
 ```
 
-## Port Forwarding
+## Setup
 
-Forward **UDP port 5520** on your router to your server's IP address.
+1. Approve the **download auth** URL in the logs
+2. After server starts, type `/auth login device` and approve again
+3. Detach with `Ctrl+P`, `Ctrl+Q`
 
-## License
+## Port
 
-MIT License - see [LICENSE](LICENSE) for details.
+Forward **UDP 5520** on your router.
 
----
+## Reference
+
+- [Hytale Server Manual](https://support.hytale.com/hc/en-us/articles/45326769420827-Hytale-Server-Manual)
+
+## Other
+
 
 This is a community project and is not affiliated with Hypixel Studios.
