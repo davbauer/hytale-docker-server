@@ -11,8 +11,8 @@ NC='\033[0m'
 
 echo ""
 echo -e "${CYAN}╔═══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}           ${GREEN}Hytale Dedicated Server${NC}                        ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}           ${BLUE}github.com/davbauer/hytale-docker-server${NC}       ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}           ${GREEN}Hytale Dedicated Server${NC}                         ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}         ${BLUE}github.com/davbauer/hytale-docker-server${NC}          ${CYAN}║${NC}"
 echo -e "${CYAN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
